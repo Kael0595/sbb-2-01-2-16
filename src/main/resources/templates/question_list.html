@@ -1,0 +1,40 @@
+<!--<link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">-->
+<!--&lt;!&ndash;style.css와 html 연결&ndash;&gt;-->
+<html layout:decorate="~{layout}">
+<!--layout decoration을 layout.html 내용으로 적용-->
+<!--<div class="container my-3">-->
+<div layout:fragment="content" class="container my-3">
+    <table class="table">
+        <thead class="table-dark">
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <!--제목 표시-->
+            <th>작성일시</th>
+            <!--작성일시 표시-->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="question, loop : ${questionList}">
+            <!--questionList에서 question 가져와서 출력(th:each => 자바의 향상된 for문과 동일)-->
+            <td th:text="${loop.count}"></td>
+            <!--question 갯수만큼 반복해서 출력-->
+            <td>
+                <!--    <tr th:each="question, index : ${questionList}">-->
+                <!--        &lt;!&ndash;향상된 for문(for each)으로 questionList에서 question 찾기&ndash;&gt;-->
+                <!--        <td>-->
+                <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                <!--      id값으로 찾은 question의 subject 표시      -->
+            </td>
+            <!--        <td th:text="${question.subject}"></td>-->
+            <!--        question에서 찾은 subject 출력-->
+            <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <!--question의 createDate를 yyyy-MM-dd HH:mm형태로 출력-->
+            <!--        <td th:text="${question.createDate}"></td>-->
+            <!--        &lt;!&ndash;찾은 question에서 content 출력&ndash;&gt;-->
+        </tr>
+        </tbody>
+    </table>
+</div>
+</html>
+

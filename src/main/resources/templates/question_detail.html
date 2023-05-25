@@ -1,0 +1,75 @@
+<link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+<!--style.css와 html 연결-->
+<div class="container my-3">
+    <!-- 질문 -->
+    <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
+    <!--question의 subject 출력-->
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
+            <!--      백색 공간에 question의 content 출력      -->
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!--         question 생성일자를 yyyy-MM-dd HH:mm 형태로 출력           -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 답변의 갯수 표시 -->
+    <h5 class="border-bottom my-3 py-2"
+        th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+    <!--  답변 갯수 표시  -->
+    <!-- 답변 반복 시작 -->
+    <div class="card my-3" th:each="answer : ${question.answerList}">
+        <!--        &lt;!&ndash;향상된 for문(for each)으로 questionList에서 question 찾기&ndash;&gt;-->
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
+            <!--      백색 공간에 답변 내용 입력      -->
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!--        답변 생성일자를 yyyy-MM-dd HH:mm 형태로 출력            -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 답변 반복 끝  -->
+    <!-- 답변 작성 -->
+    <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
+        <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
+            <div th:each="err : ${#fields.allErrors()}" th:text="${err}"/>
+        </div>
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <!--에러 발생시 form_errors의 내용 출력-->
+        <!--   id에 맞는 답변 출력   -->
+        <textarea th:field="*{content}" rows="10" class="form-control"></textarea>
+        <!--        <textarea name="content" id="content" rows="10" class="form-control"></textarea>-->
+        <!--    &lt;!&ndash;name속성을 통해 영역의 이름을 지정하고 id속성을 통해 요소를 식별&ndash;&gt;-->
+        <!--한 페이지에 답변 10개 출력-->
+        <input type="submit" value="답변등록" class="btn btn-primary my-2">
+    </form>
+</div>
+
+<!--<link rel="stylesheet" type="text/css" th:href="@{/style.css}">-->
+<!--&lt;!&ndash;style.css와 html 연결&ndash;&gt;-->
+<!--<h1 th:text="${question.subject}"></h1>-->
+<!--&lt;!&ndash;question의 subject 내용 표시&ndash;&gt;-->
+<!--<div th:text="${question.content}"></div>-->
+<!--&lt;!&ndash;question의 content 내용 표시&ndash;&gt;-->
+<!--<h5 th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>-->
+<!--&lt;!&ndash;answerList의 답변 개수 표시&ndash;&gt;-->
+<!--<div>-->
+<!--    <ul>-->
+<!--        <li th:each="answer : ${question.answerList}" th:text="${answer.content}"></li>-->
+<!--&lt;!&ndash;answerList에서 content 가져와서 출력(th:each => 자바의 향상된 for문과 동일)&ndash;&gt;-->
+<!--    </ul>-->
+<!--</div>-->
+<!--<form th:action="@{|/answer/create/${question.id}|}" method="post">-->
+<!--    &lt;!&ndash;id에 맞는 question에 answer 등록, method="post" : HTTP 요청 메서드를 설정하는 부분,-->
+<!--                                                        form이 제출될 때 post 요청이 서버로 전송&ndash;&gt;-->
+<!--    <textarea name="content" id="content" rows="15"></textarea>-->
+<!--    &lt;!&ndash;textarea : 여러줄의 텍스트를 입력할 수 있는 입력요소&ndash;&gt;-->
+<!--    &lt;!&ndash;name속성을 통해 영역의 이름을 지정하고 id속성을 통해 요소를 식별&ndash;&gt;-->
+<!--    <input type="submit" value="답변등록">-->
+<!--</form>-->
