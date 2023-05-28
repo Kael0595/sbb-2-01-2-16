@@ -1,55 +1,120 @@
-<link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
-<!--style.css와 html 연결-->
-<div class="container my-3">
-    <!-- 질문 -->
-    <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
-    <!--question의 subject 출력-->
-    <div class="card my-3">
-        <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
-            <!--      백색 공간에 question의 content 출력      -->
-            <div class="d-flex justify-content-end">
-                <div class="badge bg-light text-dark p-2 text-start">
-                    <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
-                    <!--         question 생성일자를 yyyy-MM-dd HH:mm 형태로 출력           -->
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+    <!--<link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">-->
+    <!--&lt;!&ndash;style.css와 html 연결&ndash;&gt;-->
+    <div class="container my-3">
+        <!-- 질문 -->
+        <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
+        <!--question의 subject 출력-->
+        <div class="card my-3">
+            <div class="card-body">
+                <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
+                <!--      백색 공간에 question의 content 출력      -->
+                <div class="d-flex justify-content-end">
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">
+                            <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                        </div>
+                        <!--         question에 글쓴이 있으면 글쓴이 이름 출력           -->
+                        <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                        <!--         question 생성일자를 yyyy-MM-dd HH:mm 형태로 출력           -->
+                    </div>
+                </div>
+                <div class="my-3">
+                    <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+                       th:data-uri="@{|/question/vote/${question.id}|}">
+                        추천
+                        <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span>
+                    </a>
+                    <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
+                       sec:authorize="isAuthenticated()"
+                       th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                       th:text="수정"></a>
+                    <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
+                       class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                       th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                       th:text="삭제"></a>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- 답변의 갯수 표시 -->
-    <h5 class="border-bottom my-3 py-2"
-        th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
-    <!--  답변 갯수 표시  -->
-    <!-- 답변 반복 시작 -->
-    <div class="card my-3" th:each="answer : ${question.answerList}">
-        <!--        &lt;!&ndash;향상된 for문(for each)으로 questionList에서 question 찾기&ndash;&gt;-->
-        <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
-            <!--      백색 공간에 답변 내용 입력      -->
-            <div class="d-flex justify-content-end">
-                <div class="badge bg-light text-dark p-2 text-start">
-                    <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
-                    <!--        답변 생성일자를 yyyy-MM-dd HH:mm 형태로 출력            -->
+        <!-- 답변의 갯수 표시 -->
+        <h5 class="border-bottom my-3 py-2"
+            th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+        <!--  답변 갯수 표시  -->
+        <!-- 답변 반복 시작 -->
+        <div class="card my-3" th:each="answer : ${question.answerList}">
+            <!--        &lt;!&ndash;향상된 for문(for each)으로 questionList에서 question 찾기&ndash;&gt;-->
+            <a th:id="|answer_${answer.id}|"></a>
+            <div class="card-body">
+                <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
+                <!--      백색 공간에 답변 내용 입력      -->
+                <div class="d-flex justify-content-end">
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">
+                            <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                        </div>
+                        <!--          답변에 글쓴이 있으면 글쓴이 출력          -->
+                        <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                        <!--        답변 생성일자를 yyyy-MM-dd HH:mm 형태로 출력            -->
+                    </div>
+                    <div class="my-3">
+                        <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+                           th:data-uri="@{|/answer/vote/${answer.id}|}">
+                            추천
+                            <span class="badge rounded-pill bg-success" th:text="${#lists.size(answer.voter)}"></span>
+                        </a>
+                        <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
+                           sec:authorize="isAuthenticated()"
+                           th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                           th:text="수정"></a>
+                        <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
+                           class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                           th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                           th:text="삭제"></a>
+                    </div>
                 </div>
             </div>
+            <!-- 답변 반복 끝  -->
+            <!-- 답변 작성 -->
+            <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
+                <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
+                    <div th:each="err : ${#fields.allErrors()}" th:text="${err}"/>
+                </div>
+                <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+                <!--에러 발생시 form_errors의 내용 출력-->
+                <!--   id에 맞는 답변 출력   -->
+                <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control"
+                          rows="10"></textarea>
+                <textarea sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control"
+                          rows="10"></textarea>
+                <!--        <textarea th:field="*{content}" rows="10" class="form-control"></textarea>-->
+                <!--        &lt;!&ndash;        <textarea name="content" id="content" rows="10" class="form-control"></textarea>&ndash;&gt;-->
+                <!--        &lt;!&ndash;    &lt;!&ndash;name속성을 통해 영역의 이름을 지정하고 id속성을 통해 요소를 식별&ndash;&gt;&ndash;&gt;-->
+                <!--        &lt;!&ndash;한 페이지에 답변 10개 출력&ndash;&gt;-->
+                <input type="submit" value="답변등록" class="btn btn-primary my-2">
+            </form>
         </div>
-    </div>
-    <!-- 답변 반복 끝  -->
-    <!-- 답변 작성 -->
-    <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
-        <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
-            <div th:each="err : ${#fields.allErrors()}" th:text="${err}"/>
-        </div>
-        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-        <!--에러 발생시 form_errors의 내용 출력-->
-        <!--   id에 맞는 답변 출력   -->
-        <textarea th:field="*{content}" rows="10" class="form-control"></textarea>
-        <!--        <textarea name="content" id="content" rows="10" class="form-control"></textarea>-->
-        <!--    &lt;!&ndash;name속성을 통해 영역의 이름을 지정하고 id속성을 통해 요소를 식별&ndash;&gt;-->
-        <!--한 페이지에 답변 10개 출력-->
-        <input type="submit" value="답변등록" class="btn btn-primary my-2">
-    </form>
-</div>
+        <script layout:fragment="script" type='text/javascript'>
+const delete_elements = document.getElementsByClassName("delete");
+Array.from(delete_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("정말로 삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+const recommend_elements = document.getElementsByClassName("recommend");
+Array.from(recommend_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("정말로 추천하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+
+
+        </script>
+</html>
 
 <!--<link rel="stylesheet" type="text/css" th:href="@{/style.css}">-->
 <!--&lt;!&ndash;style.css와 html 연결&ndash;&gt;-->

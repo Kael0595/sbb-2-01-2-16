@@ -1,12 +1,14 @@
 package com.ll.sbb.Question;
 
 import com.ll.sbb.Answer.Answer;
+import com.ll.sbb.User.SiteUser;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -33,4 +35,13 @@ public class Question {
     //1개의 게시물에 여러개 답변 달 수 있음, 참조내용 : question, question을 삭제하면 answer도 삭제
     private List<Answer> answerList;
     //List 형태로 answer List 생성
+
+    @ManyToOne
+    private SiteUser author;
+
+    private LocalDateTime modifyDate;
+
+    @ManyToMany
+    Set<SiteUser> voter;
+
 }

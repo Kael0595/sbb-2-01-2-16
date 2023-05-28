@@ -4,28 +4,48 @@
 <!--layout decoration을 layout.html 내용으로 적용-->
 <!--<div class="container my-3">-->
 <div layout:fragment="content" class="container my-3">
+    <div class="row my-3">
+        <div class="col-6">
+            <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+        </div>
+        <div class="col-6">
+            <div class="input-group">
+                <input type="text" id="search_kw" class="form-control" th:value="${kw}">
+                <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button>
+            </div>
+        </div>
+    </div>
     <table class="table">
         <thead class="table-dark">
-        <tr>
+        <tr class="text-center">
             <th>번호</th>
-            <th>제목</th>
-            <!--제목 표시-->
+            <th style="width:50%">제목</th>
+            <th>글쓴이</th>
             <th>작성일시</th>
-            <!--작성일시 표시-->
         </tr>
         </thead>
         <tbody>
-        <tr th:each="question, loop : ${questionList}">
-            <!--questionList에서 question 가져와서 출력(th:each => 자바의 향상된 for문과 동일)-->
-            <td th:text="${loop.count}"></td>
-            <!--question 갯수만큼 반복해서 출력-->
-            <td>
+        <tr class="text-center" th:each="question, loop : ${paging}">
+            <!--      question 갯수를 paging에 정의된 갯수에 맞게 출력(10개)      -->
+            <!--        <tr th:each="question, loop : ${questionList}">-->
+            <!--            &lt;!&ndash;questionList에서 question 가져와서 출력(th:each => 자바의 향상된 for문과 동일)&ndash;&gt;-->
+            <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
+            <!--            <td th:text="${loop.count}"></td>-->
+            <!--            &lt;!&ndash;question 갯수만큼 반복해서 출력&ndash;&gt;-->
+            <td class="text-start">
                 <!--    <tr th:each="question, index : ${questionList}">-->
                 <!--        &lt;!&ndash;향상된 for문(for each)으로 questionList에서 question 찾기&ndash;&gt;-->
                 <!--        <td>-->
                 <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
                 <!--      id값으로 찾은 question의 subject 표시      -->
+                <span class="text-danger small ms-2"
+                      th:if="${#lists.size(question.answerList) > 0}"
+                      th:text="${#lists.size(question.answerList)}">
+<!--          질문에 달린 답변 갯수가 0이 넘으면 답변 갯수 표시          -->
+                    </span>
             </td>
+            <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+            <!--      question에 작성자 있으면 작성자 표시      -->
             <!--        <td th:text="${question.subject}"></td>-->
             <!--        question에서 찾은 subject 출력-->
             <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
@@ -35,6 +55,58 @@
         </tr>
         </tbody>
     </table>
+    <!-- 페이징처리 시작 -->
+    <div th:if="${!paging.isEmpty()}">
+        <!--    페이지가 비어있으면    -->
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
+                <!--        이전 버튼 비활성화        -->
+                <a class="page-link" href="javascript:void(0)" th:data-page="${paging.number-1}">
+                    <!--                <a class="page-link" th:href="@{|?page=${paging.number-1}|}">-->
+                    <!--                    &lt;!&ndash;          이전 버튼 눌리면 페이지수 -1로 이동          &ndash;&gt;-->
+                    <span>이전</span>
+                </a>
+            </li>
+            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+                th:if="${page >= paging.number-5 and page <= paging.number+5}"
+                th:classappend="${page == paging.number} ? 'active'" class="page-item">
+                <a th:text="${page}" class="page-link" href="javascript:void(0)" th:data-page="${page}"></a>
+
+                <!--        현재 페이지 +- 5 페이지씩 보이게 페이징        -->
+                <!--        페이지와 페이지수가 같으면 버튼 활성화        -->
+                <!--                <a th:text="${page}" class="page-link" th:href="@{|?page=${page}|}"></a>-->
+            </li>
+            <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
+                <!--       다음페이지가 없으면 다음 버튼 비활성화         -->
+                <a class="page-link" href="javascript:void(0)" th:data-page="${paging.number+1}">
+                    <!--                <a class="page-link" th:href="@{|?page=${paging.number+1}|}">-->
+                    <!--                    &lt;!&ndash;          다음 버튼 누르면 페이지수 +1로 이동          &ndash;&gt;-->
+                    <span>다음</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- 페이징처리 끝 -->
+    <form th:action="@{/question/list}" method="get" id="searchForm">
+        <input type="hidden" id="kw" name="kw" th:value="${kw}">
+        <input type="hidden" id="page" name="page" th:value="${paging.number}">
+    </form>
 </div>
+<script layout:fragment="script" type='text/javascript'>
+const page_elements = document.getElementsByClassName("page-link");
+Array.from(page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        document.getElementById('page').value = this.dataset.page;
+        document.getElementById('searchForm').submit();
+    });
+});
+const btn_search = document.getElementById("btn_search");
+btn_search.addEventListener('click', function() {
+    document.getElementById('kw').value = document.getElementById('search_kw').value;
+    document.getElementById('page').value = 0;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
+    document.getElementById('searchForm').submit();
+});
+
+</script>
 </html>
 

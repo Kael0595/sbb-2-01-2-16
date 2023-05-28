@@ -3,6 +3,7 @@ package com.ll.sbb;
 import com.ll.sbb.Answer.AnswerRepository;
 import com.ll.sbb.Question.Question;
 import com.ll.sbb.Question.QuestionRepository;
+import com.ll.sbb.Question.QuestionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,11 +22,23 @@ class SbbApplicationTests {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Autowired
+    private QuestionService questionService;
+
+
     @Test
 //    @Transactional
         //트랜잭션 내에서 모든 작업이 성공하면 커밋되고, 하나라도 실패하면 롤백
     void testJpa() {
 
+//        for (int i = 1; i <= 300; i++) {
+//            String subject = String.format("테스트 데이터입니다:[%03d]", i);
+//            //for문을 통해 subject에 테스트데이터입니다 입력
+//            String content = "내용무";
+//            //content에 내용무 입력
+//            this.questionService.create(subject, content);
+//            //위에 입력된 subject, content로 question 생성
+//        }
 
 //        Optional<question> oq = this.questionRepository.findById(2);
 //        //questionRepository에서 id 2로 찾은 내용을 oq에 저장
